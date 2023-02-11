@@ -1,13 +1,14 @@
 #include "game.h"
-#include <iostream>
 #include "SDL.h"
+#include <iostream>
+#include "typedefs.h"
 
 Game::Game(std::size_t grid_width, std::size_t grid_height)
-    : snake(grid_width, grid_height),
-      engine(dev()),
+    : snake(grid_width, grid_height), engine(dev()),
       random_w(0, static_cast<int>(grid_width - 1)),
       random_h(0, static_cast<int>(grid_height - 1)) {
   PlaceFood();
+  
 }
 
 void Game::Run(Controller const &controller, Renderer &renderer,
@@ -25,11 +26,11 @@ void Game::Run(Controller const &controller, Renderer &renderer,
     // Input, Update, Render - the main game loop.
     controller.HandleInput(running, snake);
     Update();
-    renderer.Render(snake, food);
+    renderer.Render({snake, {food, FoodType::kNormal}, GameStatePhase::kPlaying});
 
     frame_end = SDL_GetTicks();
 
-    // Keep track of how long each loop through the input/update/render cycle
+    // Keep track of how long each loPop through the input/update/render cycle
     // takes.
     frame_count++;
     frame_duration = frame_end - frame_start;
@@ -66,7 +67,8 @@ void Game::PlaceFood() {
 }
 
 void Game::Update() {
-  if (!snake.alive) return;
+  if (!snake.alive)
+    return;
 
   snake.Update();
 
