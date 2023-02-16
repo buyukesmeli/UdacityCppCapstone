@@ -12,6 +12,7 @@ Renderer::Renderer(const std::size_t screen_width,
     std::cerr << "SDL could not initialize.\n";
     std::cerr << "SDL_Error: " << SDL_GetError() << "\n";
   }
+  TTF_Init();
 
   // Create Window
   sdl_window = SDL_CreateWindow("Snake Game", SDL_WINDOWPOS_CENTERED,
@@ -34,28 +35,57 @@ Renderer::Renderer(const std::size_t screen_width,
 Renderer::~Renderer() {
   SDL_DestroyWindow(sdl_window);
   SDL_DestroyRenderer(sdl_renderer);
+  TTF_Init();
   SDL_Quit();
 }
 
-void Renderer::Render(GameState const &game_state) {
-  // Snake const snake, SDL_Point const &food
-  //TODO: to be removed
-  Snake snake = game_state.snake;
-  SDL_Point food = game_state.food.position;
-  //
-  SDL_Rect block;
-  block.w = screen_width / grid_width;
-  block.h = screen_height / grid_height;
-
+// Render the UI element list
+void Renderer::Render(
+    std::vector<std::unique_ptr<DynamicElement>> const *UIElements) {
   // Clear screen
   SDL_SetRenderDrawColor(sdl_renderer, 0x1E, 0x1E, 0x1E, 0xFF);
   SDL_RenderClear(sdl_renderer);
+  for (auto &element : *UIElements) {
+    element->render(sdl_renderer);
+  }
+  // Update Screen
+  SDL_RenderPresent(sdl_renderer);
+}
+
+// Render the game state
+void Renderer::Render(GameState const &game_state) {
+  // Clear screen
+  SDL_SetRenderDrawColor(sdl_renderer, 0x1E, 0x1E, 0x1E, 0xFF);
+  SDL_RenderClear(sdl_renderer);
+
+  drawPlaying(game_state.snake, game_state.food.position,
+              game_state.bToggle && game_state.bSpecialFoodActive,
+              game_state.specialFood.position);
+  // Update Screen
+  SDL_RenderPresent(sdl_renderer);
+}
+
+void Renderer::drawPlaying(const Snake &snake, const SDL_Point &food,
+                           const bool &bSpecialFood,
+                           const SDL_Point &specialFood) {
+
+  SDL_Rect block;
+  block.w = screen_width / grid_width;
+  block.h = screen_height / grid_height;
 
   // Render food
   SDL_SetRenderDrawColor(sdl_renderer, 0xFF, 0xCC, 0x00, 0xFF);
   block.x = food.x * block.w;
   block.y = food.y * block.h;
   SDL_RenderFillRect(sdl_renderer, &block);
+
+  // Render Special food
+  if (bSpecialFood) {
+    SDL_SetRenderDrawColor(sdl_renderer, 0xFF, 0x11, 0x00, 0xFF);
+    block.x = specialFood.x * block.w;
+    block.y = specialFood.y * block.h;
+    SDL_RenderFillRect(sdl_renderer, &block);
+  }
 
   // Render snake's body
   SDL_SetRenderDrawColor(sdl_renderer, 0xFF, 0xFF, 0xFF, 0xFF);
@@ -74,9 +104,6 @@ void Renderer::Render(GameState const &game_state) {
     SDL_SetRenderDrawColor(sdl_renderer, 0xFF, 0x00, 0x00, 0xFF);
   }
   SDL_RenderFillRect(sdl_renderer, &block);
-
-  // Update Screen
-  SDL_RenderPresent(sdl_renderer);
 }
 
 void Renderer::UpdateWindowTitle(int score, int fps) {
@@ -84,3 +111,5 @@ void Renderer::UpdateWindowTitle(int score, int fps) {
                     " FPS: " + std::to_string(fps)};
   SDL_SetWindowTitle(sdl_window, title.c_str());
 }
+
+SDL_Renderer *Renderer::getRenderer() { return sdl_renderer; }

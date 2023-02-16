@@ -1,7 +1,10 @@
+#include <iostream>
+#include <memory>
+#include <vector>
+
 #include "controller.h"
 #include "game.h"
 #include "renderer.h"
-#include <iostream>
 
 int main() {
   constexpr std::size_t kFramesPerSecond{60};
@@ -14,7 +17,12 @@ int main() {
   Renderer renderer(kScreenWidth, kScreenHeight, kGridWidth, kGridHeight);
   Controller controller;
   Game game(kGridWidth, kGridHeight);
-  game.Run(controller, renderer, kMsPerFrame);
+  // Set the renderer and controller for the game before setting up the UI
+  game.setRenderer(&renderer);
+  game.setController(&controller);
+  game.setUI();
+  // Run the main loop
+  game.Run(kMsPerFrame);
   std::cout << "Game has terminated successfully!\n";
   std::cout << "Score: " << game.GetScore() << "\n";
   std::cout << "Size: " << game.GetSize() << "\n";

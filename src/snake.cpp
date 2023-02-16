@@ -78,3 +78,14 @@ bool Snake::SnakeCell(int x, int y) {
   }
   return false;
 }
+
+void Snake::Reset() {
+  head_x = grid_width / 2;
+  head_y = grid_height / 2;
+  size = 1;
+  alive = true;
+  growing = false;
+  body.clear();
+  direction = Direction::kUp;
+  speed = 0.1f;
+}

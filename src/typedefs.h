@@ -16,20 +16,23 @@ struct Size {
 struct Rect {
   Point position;
   Size size;
+  bool contains(Point point) const {
+    return point.x >= position.x && point.x <= position.x + size.width &&
+           point.y >= position.y && point.y <= position.y + size.height;
+  }
 };
 
-enum GameStatePhase {
-  kMenu,
-  kPlaying,
-  kGameOver
+enum GameStatePhase { kMenu, kPlaying, kGameOver };
+
+enum FoodType { kNormal, kSpecial };
+
+enum ButtonState {
+  kMouseOut,
+  kMouseOver,
+  kMouseDown,
 };
 
-enum FoodType {
-  kNormal,
-  kSpecial
-};
-
-struct Food{
+struct Food {
   SDL_Point position;
   FoodType type;
 };
@@ -37,9 +40,10 @@ struct Food{
 struct GameState {
   Snake snake;
   Food food;
-  // int score;
+  Food specialFood;
+  bool bSpecialFoodActive;
+  bool bToggle;
   GameStatePhase phase;
 };
-
 
 #endif

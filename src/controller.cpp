@@ -10,7 +10,23 @@ void Controller::ChangeDirection(Snake &snake, Snake::Direction input,
   return;
 }
 
-void Controller::HandleInput(bool &running, Snake &snake) const {
+// Process input from the user for the dyamic element list
+void Controller::HandleInput(
+    bool &running,
+    std::vector<std::unique_ptr<DynamicElement>> *UIElements) const {
+  SDL_Event e;
+  while (SDL_PollEvent(&e)) {
+    if (e.type == SDL_QUIT) {
+      running = false;
+    }
+    for (auto &element : *UIElements) {
+      element->handleEvent(&e);
+    }
+  }
+}
+
+// Process input from the user for the game
+void Controller::HandleInput(bool &running, GameState &gameState) const {
   SDL_Event e;
   while (SDL_PollEvent(&e)) {
     if (e.type == SDL_QUIT) {
@@ -18,20 +34,22 @@ void Controller::HandleInput(bool &running, Snake &snake) const {
     } else if (e.type == SDL_KEYDOWN) {
       switch (e.key.keysym.sym) {
       case SDLK_UP:
-        ChangeDirection(snake, Snake::Direction::kUp, Snake::Direction::kDown);
+        ChangeDirection(gameState.snake, Snake::Direction::kUp,
+                        Snake::Direction::kDown);
         break;
 
       case SDLK_DOWN:
-        ChangeDirection(snake, Snake::Direction::kDown, Snake::Direction::kUp);
+        ChangeDirection(gameState.snake, Snake::Direction::kDown,
+                        Snake::Direction::kUp);
         break;
 
       case SDLK_LEFT:
-        ChangeDirection(snake, Snake::Direction::kLeft,
+        ChangeDirection(gameState.snake, Snake::Direction::kLeft,
                         Snake::Direction::kRight);
         break;
 
       case SDLK_RIGHT:
-        ChangeDirection(snake, Snake::Direction::kRight,
+        ChangeDirection(gameState.snake, Snake::Direction::kRight,
                         Snake::Direction::kLeft);
         break;
       }
